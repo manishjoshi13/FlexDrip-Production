@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'rethink-bold';
+  src: url('../src/assets/fonts/RethinkSans-Bold.woff2') format('opentype');
+
+}
+@font-face {
+  font-family: 'rethink-medium';
+  src: url('../src/assets/fonts/RethinkSans-Medium.woff') format('opentype');
+
+}
+@font-face {
+  font-family: 'rethink-Regular';
+  src: url('../src/assets/fonts/RethinkSans-Regular.woff2') format('opentype');
+
+}
+html{
+  scrollbar-gutter:stable;
+}
+
+#root,html,body{
+  width: 100%;
+  box-sizing: border-box;
+  height: 100%;
+  font-family: 'rethink-Regular', sans-serif;
+  background-color: #fafafa;
+  color: #111827;
+}
+
+.font-medium {
+  font-family: 'rethink-medium', sans-serif !important;
+}
+
+.font-semibold {
+  font-family: 'rethink-medium', sans-serif !important;
+}
+
+.font-bold {
+  font-family: 'rethink-bold', sans-serif !important;
+}
