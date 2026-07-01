@@ -7,7 +7,7 @@ export const getOrderRecievedHTML = (
     buyerName = 'N/A',
     buyerEmail = 'N/A',
     buyerPhone = 'N/A',
-    dashboardUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/seller/dashboard`
+    dashboardUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/seller`
 ) => {
     const formattedAddress = typeof shippingAddress === 'object' && shippingAddress
         ? `${shippingAddress.addressLine || ''}, ${shippingAddress.city || ''}, ${shippingAddress.state || ''} - ${shippingAddress.postalCode || ''}`.replace(/^,\s*|,\s*$/g, '')

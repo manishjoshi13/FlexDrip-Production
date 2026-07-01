@@ -38,15 +38,20 @@ export const register = asyncHandler(async (req, res) => {
     );
 
     // Send verification email
-    const frontendUrl = getFrontendUrl();
-    const emailHtml = getVerifyAccountHTML(fullName, verificationToken, frontendUrl);
+    const backendUrl = config.BACKEND_URL ;
+    const emailHtml = getVerifyAccountHTML(fullName, verificationToken, backendUrl);
 
-    await sendEmail(
-        email,
-        "Verify Your FlexDrip Account",
-        "Verify your account by clicking the link.",
-        emailHtml
-    ).catch(err => console.error("Verify email error:", err));
+    try {
+        await sendEmail(
+            email,
+            "Verify Your FlexDrip Account",
+            "Verify your account by clicking the link.",
+            emailHtml
+        );
+    } catch (err) {
+        console.error("Verify email error:", err);
+        throw new AppError(`Failed to send verification email: ${err.message || err}`, 500);
+    }
 
     res.status(200).json({
         success: true,
@@ -298,12 +303,17 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
     const emailHtml = getChangePasswordHTML(user.fullName, resetUrl);
 
-    sendEmail(
-        user.email,
-        "Reset Your FlexDrip Password",
-        `Reset your password using this link: ${resetUrl}`,
-        emailHtml
-    ).catch(err => console.error("Reset password email error:", err));
+    try {
+        await sendEmail(
+            user.email,
+            "Reset Your FlexDrip Password",
+            `Reset your password using this link: ${resetUrl}`,
+            emailHtml
+        );
+    } catch (err) {
+        console.error("Reset password email error:", err);
+        throw new AppError(`Failed to send password reset email: ${err.message || err}`, 500);
+    }
 
     res.status(200).json({
         success: true,

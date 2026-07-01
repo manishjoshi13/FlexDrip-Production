@@ -11,7 +11,7 @@ const CreateProduct = () => {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('ESSENTIALS');
+    const [category, setCategory] = useState('OUTWEAR');
     const [priceAmount, setPriceAmount] = useState('');
     const [priceCurrency, setPriceCurrency] = useState('INR');
     const [images, setImages] = useState([]);
@@ -392,9 +392,8 @@ const CreateProduct = () => {
                                 onChange={(e) => setCategory(e.target.value)}
                                 className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm font-semibold outline-none focus:border-gray-350 cursor-pointer"
                             >
-                                <option value="ESSENTIALS">ESSENTIALS</option>
-                                <option value="SHIRTS">SHIRTS</option>
-                                <option value="DENIM">DENIM</option>
+                                <option value="OUTWEAR">OUTWEAR</option>
+                                <option value="FOOTWEAR">FOOTWEAR</option>
                                 <option value="ACCESSORIES">ACCESSORIES</option>
                             </select>
                         </div>

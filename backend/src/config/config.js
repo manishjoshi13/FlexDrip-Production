@@ -39,6 +39,9 @@ if(!process.env.NODEMAILER_REFRESH_TOKEN){
 if(!process.env.NODEMAILER_EMAIL_USER){
     throw new Error("NODEMAILER_EMAIL_USER is not defined");
 }
+if(!process.env.NODEMAILER_APP_PASSWORD){
+    throw new Error("NODEMAILER_APP_PASSWORD is not defined");
+}
 if(!process.env.PINECONE_API_KEY){
     throw new Error("PINECONE_API_KEY is not defined");
 }
@@ -57,6 +60,7 @@ export const config= {
     PORT:process.env.PORT,
     MONGODB_URI:process.env.MONGODB_URI,
     FRONTEND_URL:process.env.FRONTEND_URL,
+    BACKEND_URL:process.env.BACKEND_URL,
     JWT_SECRET:process.env.JWT_SECRET,
     JWT_EXPIRES_IN:process.env.JWT_EXPIRES_IN,
     ENVIRONMENT:process.env.ENVIRONMENT,
@@ -68,6 +72,7 @@ export const config= {
     NODEMAILER_CLIENT_SECRET:process.env.NODEMAILER_CLIENT_SECRET,
     NODEMAILER_REFRESH_TOKEN:process.env.NODEMAILER_REFRESH_TOKEN,
     NODEMAILER_EMAIL_USER:process.env.NODEMAILER_EMAIL_USER,
+    NODEMAILER_APP_PASSWORD:process.env.NODEMAILER_APP_PASSWORD,
     PINECONE_API_KEY:process.env.PINECONE_API_KEY,
     PINECONE_INDEX:process.env.PINECONE_INDEX,
     MISTRAL_API_KEY:process.env.MISTRAL_API_KEY,

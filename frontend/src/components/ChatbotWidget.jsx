@@ -71,6 +71,29 @@ const ChatbotWidget = () => {
         }
     };
 
+    const renderFormattedContent = (text) => {
+        if (!text) return '';
+        const parts = text.split(/(\*\*.*?\*\*)/g);
+        return parts.map((part, index) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={index} className="font-bold text-neutral-950">{part.slice(2, -2)}</strong>;
+            }
+            const codeParts = part.split(/(`.*?`)/g);
+            return codeParts.map((codePart, codeIdx) => {
+                if (codePart.startsWith('`') && codePart.endsWith('`')) {
+                    return <code key={`${index}-${codeIdx}`} className="bg-neutral-100 px-1.5 py-0.5 rounded font-mono text-[10px] text-red-600">{codePart.slice(1, -1)}</code>;
+                }
+                const italicParts = codePart.split(/(\*.*?\*)/g);
+                return italicParts.map((italicPart, italicIdx) => {
+                    if (italicPart.startsWith('*') && italicPart.endsWith('*')) {
+                        return <em key={`${index}-${codeIdx}-${italicIdx}`} className="italic">{italicPart.slice(1, -1)}</em>;
+                    }
+                    return italicPart;
+                });
+            });
+        });
+    };
+
     const handleFormSubmit = (e) => {
         e.preventDefault();
         handleSendMessage();
@@ -111,12 +134,12 @@ const ChatbotWidget = () => {
                     </div>
 
                     {/* Messages Body */}
-                    <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-[#fafaf9]/30">
+                    <div className="flex-grow overflow-y-auto overflow-x-hidden p-4 space-y-4 bg-[#fafaf9]/30">
                         {messages.map((msg, idx) => {
                             const isUser = msg.role === 'user';
                             return (
                                 <div key={idx} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`flex gap-2 max-w-[82%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                                    <div className={`flex gap-2 max-w-[82%] min-w-0 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                                         
                                         {/* Avatar */}
                                         <div className={`w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[9px] font-bold border shadow-xs ${
@@ -126,14 +149,14 @@ const ChatbotWidget = () => {
                                         }`}>
                                             {isUser ? (user?.fullName ? user.fullName[0].toUpperCase() : 'U') : 'F'}
                                         </div>
-
+ 
                                         {/* Content Bubble */}
-                                        <div className={`px-4 py-3 rounded-2xl text-xs font-medium leading-relaxed whitespace-pre-wrap ${
+                                        <div className={`px-4 py-3 rounded-2xl text-xs font-medium leading-relaxed whitespace-pre-wrap break-words min-w-0 ${
                                             isUser 
                                                 ? 'bg-neutral-900 text-white rounded-tr-none' 
                                                 : 'bg-white text-neutral-850 border border-neutral-200/60 rounded-tl-none shadow-[0_2px_8px_rgba(0,0,0,0.01)]'
                                         }`}>
-                                            {msg.content}
+                                            {renderFormattedContent(msg.content)}
                                         </div>
                                     </div>
                                 </div>

@@ -1,16 +1,18 @@
 import nodemailer from 'nodemailer'
 import {config} from '../config/config.js'
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    type: 'OAuth2',
-    user:config.NODEMAILER_EMAIL_USER,
-    clientId:config.NODEMAILER_CLIENT_ID,
-    clientSecret:config.NODEMAILER_CLIENT_SECRET,
-    refreshToken:config.NODEMAILER_REFRESH_TOKEN,
-  },
-});
+const transportConfig = {
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user: config.NODEMAILER_EMAIL_USER,
+        clientId: config.NODEMAILER_CLIENT_ID,
+        clientSecret: config.NODEMAILER_CLIENT_SECRET,
+        refreshToken: config.NODEMAILER_REFRESH_TOKEN,
+      }
+    };
+
+const transporter = nodemailer.createTransport(transportConfig);
 
 transporter.verify((error, success) => {
   if (error) {
@@ -19,7 +21,6 @@ transporter.verify((error, success) => {
     console.log('Email server is ready to send messages');
   }
 });
-
 
 const sendEmail = async (to, subject, text, html) => {
   try {
@@ -32,9 +33,10 @@ const sendEmail = async (to, subject, text, html) => {
     });
 
     console.log('Message sent: %s', info.messageId);
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    return info;
   } catch (error) {
     console.error('Error sending email:', error);
+    throw error;
   }
 };
 

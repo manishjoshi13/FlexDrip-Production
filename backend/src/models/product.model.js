@@ -12,8 +12,8 @@ const productSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
-        enum: ['SHIRTS', 'DENIM', 'ACCESSORIES', 'ESSENTIALS'],
-        default: 'ESSENTIALS'
+        enum: ['OUTWEAR', 'FOOTWEAR', 'ACCESSORIES'],
+        default: 'OUTWEAR'
     },
     seller: {
         type: mongoose.Schema.Types.ObjectId,

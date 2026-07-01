@@ -3,12 +3,8 @@ import { Order } from "../models/order.model.js";
 import { asyncHandler } from "../utils/asyncWrapper.js";
 
 export const getAllProducts=asyncHandler(async(req,res)=>{
-    const products = await Product.aggregate([
-        {
-            $sample: { size: 10 }
-        }
-    ]);
-    if(!products){
+    const products = await Product.find({}).sort({ createdAt: -1 });
+    if(!products || products.length === 0){
         return res.status(200).json({success:true,products:[],message:"No products found"})
     }
     return res.status(200).json({success:true,products,message:"Products fetched successfully"})

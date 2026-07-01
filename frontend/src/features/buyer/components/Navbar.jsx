@@ -5,7 +5,7 @@ import { useCart } from '../../buyer/hooks/useCart';
 import { LogOut, Menu, X, ShoppingBag } from 'lucide-react';
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, isLoading } = useAuth();
     const { cart, getCart } = useCart();
     const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -38,6 +38,7 @@ const Navbar = () => {
                     <div className="hidden md:flex space-x-10 items-center h-full">
                         <NavLink 
                             to="/" 
+                            end
                             className={({ isActive }) => 
                                 `text-xs font-bold uppercase tracking-wider transition-all relative py-6 h-full flex items-center
                                 ${isActive ? 'text-black' : 'text-neutral-400 hover:text-black'}
@@ -74,7 +75,12 @@ const Navbar = () => {
                             </NavLink>
                         )}
 
-                        {user ? (
+                        {isLoading ? (
+                            <div className="flex items-center gap-3 animate-pulse">
+                                <div className="w-8 h-8 rounded-full bg-neutral-200" />
+                                <div className="h-3 bg-neutral-200 rounded w-16" />
+                            </div>
+                        ) : user ? (
                             <div className="relative">
                                 <button
                                     onClick={() => setDropdownOpen(!dropdownOpen)}

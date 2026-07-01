@@ -25,7 +25,6 @@ export const useCart = () => {
     }
 
     const addCartItem = async (cartItem) => {
-        dispatch(setLoading(true));
         dispatch(setError(null));
         try {
             const response = await addCartItemAPI(cartItem);
@@ -35,13 +34,10 @@ export const useCart = () => {
             const errorMsg = error.response?.data?.message || error.message;
             dispatch(setError(errorMsg));
             return { success: false, error: errorMsg };
-        } finally {
-            dispatch(setLoading(false));
         }
     }
 
     const removeCartItem = async (cartItem) => {
-        dispatch(setLoading(true));
         dispatch(setError(null));
         try {
             const response = await removeCartItemAPI(cartItem);
@@ -51,13 +47,10 @@ export const useCart = () => {
             const errorMsg = error.response?.data?.message || error.message;
             dispatch(setError(errorMsg));
             return { success: false, error: errorMsg };
-        } finally {
-            dispatch(setLoading(false));
         }
     }
 
     const clearCart = async () => {
-        dispatch(setLoading(true));
         dispatch(setError(null));
         try {
             const response = await clearCartAPI();
@@ -67,8 +60,6 @@ export const useCart = () => {
             const errorMsg = error.response?.data?.message || error.message;
             dispatch(setError(errorMsg));
             return { success: false, error: errorMsg };
-        } finally {
-            dispatch(setLoading(false));
         }
     }
 

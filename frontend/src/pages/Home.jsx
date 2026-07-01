@@ -6,28 +6,44 @@ import {
     AlertCircle, 
     ArrowDown, 
     Shirt, 
-    ShieldCheck, 
-    Truck, 
-    RotateCcw, 
     ArrowRight, 
-    Sparkles, 
-    Flame, 
-    Layers, 
-    Crown, 
-    Glasses,
-    ArrowUpRight,
-    TrendingUp,
-    Compass
+    Sparkles,
+    Search,
+    X,
+    CheckCircle2
 } from 'lucide-react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../features/auth/hooks/useAuth';
 
 const Home = () => {
-    const { fetchProducts, fetchTrendingProducts, allProducts, trendingProducts, isLoading, error } = useBuyer();
+    const { fetchProducts, fetchTrendingProducts, allProducts, isLoading, error } = useBuyer();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const categoryParam = searchParams.get('category');
+    
+    // UI Filters and States
     const [selectedTab, setSelectedTab] = useState('ALL');
+    const [searchQuery, setSearchQuery] = useState('');
     const [showProfileAlert, setShowProfileAlert] = useState(false);
+    
+    // Interactive philosophy modal state
+    const [philosophyOpen, setPhilosophyOpen] = useState(false);
+
+    // Sync selected tab with category search param from URL (e.g. from navbar side drawer)
+    useEffect(() => {
+        if (categoryParam) {
+            const upperParam = categoryParam.toUpperCase();
+            if (['OUTWEAR', 'FOOTWEAR', 'ACCESSORIES', 'ALL'].includes(upperParam)) {
+                setSelectedTab(upperParam);
+            }
+        }
+    }, [categoryParam]);
+    
+    // Inner Circle newsletter state
+    const [email, setEmail] = useState('');
+    const [subscriptionStatus, setSubscriptionStatus] = useState(''); // '', 'success', 'error'
+    const [subscriberName, setSubscriberName] = useState('');
 
     useEffect(() => {
         if (user && user.profileCompleted === false) {
@@ -46,27 +62,30 @@ const Home = () => {
             element.scrollIntoView({ behavior: 'smooth' });
         }
     };
-    
-    // Categories matching database category values with styling
-    const categories = [
-        { id: 'ALL', name: 'All In', Icon: Compass, desc: 'Complete Drop' },
-        { id: 'TRENDING', name: 'Trending', Icon: Flame, desc: 'Hot Picks' },
-        { id: 'SHIRTS', name: 'Shirts', Icon: Shirt, desc: 'Oversized Tees' },
-        { id: 'DENIM', name: 'Denim', Icon: Layers, desc: 'Utility Jeans' },
-        { id: 'ESSENTIALS', name: 'Essentials', Icon: Crown, desc: 'Premium Basics' },
-        { id: 'ACCESSORIES', name: 'Accessories', Icon: Glasses, desc: 'Urban Accents' }
-    ];
 
-    // Filter products dynamically based on selected tab matching backend product.category
+    const handleSubscribe = (e) => {
+        e.preventDefault();
+        if (!email || !email.includes('@')) {
+            setSubscriptionStatus('error');
+            return;
+        }
+        setSubscriptionStatus('success');
+        setSubscriberName(email.split('@')[0]);
+        setTimeout(() => {
+            setEmail('');
+        }, 2000);
+    };
+
+    // Filter products dynamically based on selected tab and search query
     const filteredProducts = allProducts 
         ? allProducts.filter(product => {
-            if (selectedTab === 'ALL') return true;
-            if (selectedTab === 'TRENDING') return false;
-            return product.category === selectedTab;
+            const matchesCategory = selectedTab === 'ALL' || product.category === selectedTab;
+            const matchesSearch = product.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                  product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                  product.category?.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesCategory && matchesSearch;
         })
         : [];
-
-    const displayProducts = selectedTab === 'TRENDING' ? trendingProducts : filteredProducts;
 
     return (
         <div className="min-h-screen bg-[#fafaf9] flex flex-col font-sans select-none antialiased text-neutral-900">
@@ -79,7 +98,7 @@ const Home = () => {
                                 <AlertCircle className="w-7 h-7 stroke-[1.75]" />
                             </div>
                             <h3 className="text-base font-bold uppercase tracking-wider text-neutral-950">Complete Your Profile</h3>
-                            <p className="text-xs text-neutral-400 font-medium leading-relaxed">
+                            <p className="text-xs text-neutral-450 font-semibold leading-relaxed">
                                 Welcome to FlexDrip! Please complete your profile details (add phone number & confirm account type) to enable shopping checkout features.
                             </p>
                         </div>
@@ -105,6 +124,43 @@ const Home = () => {
                 </div>
             )}
 
+            {/* Philosophy Dialog Modal */}
+            {philosophyOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-350">
+                    <div className="bg-white rounded-3xl border border-neutral-100 shadow-2xl p-6 sm:p-8 max-w-lg w-full relative space-y-6 animate-in zoom-in-95 duration-250">
+                        <button 
+                            onClick={() => setPhilosophyOpen(false)}
+                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-black cursor-pointer border-none bg-transparent"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                        
+                        <div className="space-y-4">
+                            <span className="text-[10px] font-extrabold tracking-[0.25em] text-neutral-400 uppercase">Our Philosophy</span>
+                            <h3 className="text-xl sm:text-2xl font-extrabold tracking-wider uppercase text-neutral-950">Engineered for the Urban Void</h3>
+                            <div className="w-12 h-[2px] bg-black" />
+                            
+                            <p className="text-xs text-neutral-600 font-semibold leading-relaxed">
+                                FlexDrip represents an architectural, structural response to modern environments. We conceive garments as wearable structures that shield, flex, and define silhouettes in high-density urban spaces.
+                            </p>
+                            
+                            <p className="text-xs text-neutral-600 font-semibold leading-relaxed">
+                                Every collection is strictly limited, prioritizing heavy organic textiles, technical custom-dyed waterproof weaves, and zero-compromise utility hardware. We reject fast trends to engineer modular, timeless assets.
+                            </p>
+                        </div>
+
+                        <div className="pt-2">
+                            <button
+                                onClick={() => setPhilosophyOpen(false)}
+                                className="w-full bg-black text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-neutral-900 transition-colors cursor-pointer border-none"
+                            >
+                                Acknowledge Philosophy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Navbar */}
             <Navbar />
 
@@ -116,169 +172,237 @@ const Home = () => {
                         You are logged in as a Merchant. Switch to the seller dashboard to manage listings.
                     </span>
                     <NavLink to="/seller" className="underline hover:text-amber-900 shrink-0 flex items-center gap-1">
-                        Seller Panel <ArrowUpRight className="w-3.5 h-3.5" />
+                        Seller Panel <ArrowRight className="w-3.5 h-3.5 rotate-[-45deg]" />
                     </NavLink>
                 </div>
             )}
 
             {/* Premium Editorial Hero Section */}
-            <header className="relative bg-neutral-950 h-[80vh] flex items-center justify-start overflow-hidden">
+            <header className="relative bg-neutral-900 h-[80vh] flex items-center justify-start overflow-hidden">
                 {/* Background Banner */}
                 <div className="absolute inset-0 z-0">
                     <img 
-                        src="/fashion_hero_banner.png" 
-                        alt="Summer Collection" 
-                        className="w-full h-full object-cover opacity-80 filter brightness-[0.6] saturate-[0.85] transition-transform duration-10000 hover:scale-[1.05]" 
+                        src="/architectural_streetwear_hero.png" 
+                        alt="Architectural Streetwear Essentials" 
+                        className="w-full h-full object-cover opacity-80 filter brightness-[0.7] saturate-[0.8] transition-transform duration-10000 hover:scale-[1.03]" 
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/40 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#fafaf9] via-transparent to-transparent" />
                 </div>
 
                 {/* Hero Content Area */}
                 <div className="relative z-10 max-w-7xl mx-auto px-8 sm:px-12 w-full text-left">
                     <div className="max-w-xl space-y-6 animate-in slide-in-from-bottom-6 duration-700">
-                        <span className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[9px] font-bold tracking-[0.25em] uppercase text-white/90">
-                            <Sparkles className="w-3 h-3 text-amber-300" /> Drop '26 / Escape Core
+                        <span className="inline-block text-[11px] font-extrabold tracking-[0.3em] uppercase text-neutral-300">
+                            Essentials Drop
                         </span>
                         
                         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white uppercase leading-none">
-                            THE ART OF <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-neutral-100 to-amber-100">
-                                MINIMALISM
+                            Architectural <br />
+                            <span className="text-neutral-200">
+                                Streetwear.
                             </span>
                         </h1>
                         
-                        <p className="text-xs sm:text-sm text-neutral-350 font-medium leading-relaxed max-w-md">
-                            Experience structured streetwear silhouettes, heavy organic fabrics, and custom-dyed earth tones crafted for a timeless modern capsule.
-                        </p>
-                        
-                        <div className="pt-4 flex gap-4">
+                        <div className="pt-4 flex flex-wrap gap-4">
                             <button
                                 onClick={scrollToCatalog}
-                                className="group flex items-center gap-2 bg-white text-black px-6 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-neutral-100 active:scale-[0.98] transition-all cursor-pointer shadow-lg hover:shadow-white/5"
+                                className="group flex items-center gap-2 bg-black text-white px-7 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-neutral-850 active:scale-[0.98] transition-all cursor-pointer shadow-lg border-none"
                             >
-                                Shop Drop
+                                New Collection
                                 <ArrowDown className="w-3.5 h-3.5 stroke-[2.5] group-hover:translate-y-0.5 transition-transform duration-200" />
                             </button>
                             
-                            <a
-                                href="#lookbook"
-                                className="inline-flex items-center justify-center border border-white/30 hover:border-white text-white px-6 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-all"
+                            <button
+                                onClick={() => {
+                                    setSelectedTab('OUTWEAR');
+                                    scrollToCatalog();
+                                }}
+                                className="inline-flex items-center justify-center border border-white/40 hover:border-white text-white px-7 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/5 active:scale-[0.98] transition-all cursor-pointer bg-transparent"
                             >
-                                Editorial
-                            </a>
+                                Shop Essentials
+                            </button>
                         </div>
                     </div>
                 </div>
             </header>
 
-            {/* Category Track (Overhauled Category Section) */}
-            <section className="py-16 bg-white border-b border-neutral-100/50">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                    <div className="text-center max-w-sm mx-auto mb-10">
-                        <span className="text-[10px] font-bold tracking-[0.25em] text-amber-600 uppercase">Curated Capsules</span>
-                        <h2 className="text-xl font-bold tracking-wider uppercase text-neutral-950 mt-1">Shop by Line</h2>
-                        <div className="w-10 h-[1.5px] bg-neutral-950 mx-auto mt-2" />
+            {/* Shop by Line Section */}
+            <section className="py-24 bg-white border-b border-neutral-100/50">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-12">
+                    {/* Header */}
+                    <div className="flex items-end justify-between border-b border-neutral-100 pb-5">
+                        <div className="space-y-1">
+                            <h2 className="text-xl font-bold tracking-widest uppercase text-neutral-950 relative inline-block">
+                                Shop by Line
+                                <span className="block h-[2.5px] bg-black w-8 mt-2" />
+                            </h2>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setSelectedTab('ALL');
+                                scrollToCatalog();
+                            }}
+                            className="text-[10px] font-extrabold text-neutral-450 uppercase tracking-widest hover:text-black transition-colors bg-transparent border-none cursor-pointer"
+                        >
+                            Explore All
+                        </button>
                     </div>
                     
-                    {/* Premium Grid Categories buttons */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 py-2">
-                        {categories.map((cat) => {
-                            const isSelected = selectedTab === cat.id;
-                            const Icon = cat.Icon;
+                    {/* Cards Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                        {/* Left Main Card: Kinetic Series */}
+                        <div 
+                            onClick={() => {
+                                setSelectedTab('FOOTWEAR');
+                                scrollToCatalog();
+                            }}
+                            className="lg:col-span-3 relative rounded-3xl overflow-hidden group aspect-[5/4] md:aspect-auto md:h-[500px] cursor-pointer shadow-[0_8px_30px_rgb(0,0,0,0.01)]"
+                        >
+                            <img 
+                                src="/kinetic_series.png" 
+                                alt="The Kinetic Series Shoes" 
+                                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent transition-opacity duration-300" />
+                            <div className="absolute bottom-8 left-8 text-white space-y-1">
+                                <h3 className="text-lg font-bold tracking-widest uppercase">The Kinetic Series</h3>
+                                <p className="text-[9px] text-neutral-300 font-extrabold uppercase tracking-widest">*Performance Engineered</p>
+                            </div>
+                        </div>
 
-                            return (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => {
-                                        setSelectedTab(cat.id);
-                                        scrollToCatalog();
-                                    }}
-                                    className={`flex flex-col items-center justify-center p-6 rounded-2xl border transition-all duration-300 group cursor-pointer text-center relative overflow-hidden
-                                        ${isSelected 
-                                            ? 'bg-black border-black text-white shadow-xl shadow-black/5 -translate-y-1' 
-                                            : 'bg-[#fafaf9] border-neutral-200/50 hover:bg-white hover:border-black/50 hover:shadow-md hover:-translate-y-0.5'}`}
-                                >
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors duration-300
-                                        ${isSelected ? 'bg-white text-black' : 'bg-neutral-100 text-neutral-800 group-hover:bg-black group-hover:text-white'}`}>
-                                        <Icon className="w-4.5 h-4.5 stroke-[1.5]" />
-                                    </div>
-                                    <span className="text-[11px] font-bold tracking-widest uppercase block">
-                                        {cat.name}
-                                    </span>
-                                    <span className={`text-[8px] font-medium uppercase tracking-wider block mt-0.5
-                                        ${isSelected ? 'text-amber-200' : 'text-neutral-400 group-hover:text-neutral-600'}`}>
-                                        {cat.desc}
-                                    </span>
-                                    
-                                    {isSelected && (
-                                        <span className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-200 to-amber-100" />
-                                    )}
-                                </button>
-                            );
-                        })}
+                        {/* Right Stack: Core Essentials & Elemental Shield */}
+                        <div className="lg:col-span-2 flex flex-col gap-6 h-[500px]">
+                            {/* Top Card: Core Essentials */}
+                            <div 
+                                onClick={() => {
+                                    setSelectedTab('OUTWEAR');
+                                    scrollToCatalog();
+                                }}
+                                className="flex-1 relative rounded-3xl overflow-hidden group cursor-pointer shadow-[0_8px_30px_rgb(0,0,0,0.01)]"
+                            >
+                                <img 
+                                    src="/core_essentials.png" 
+                                    alt="Core Essentials Flat Lay" 
+                                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+                                <div className="absolute bottom-6 left-6 text-white">
+                                    <h3 className="text-sm font-bold tracking-widest uppercase">Core Essentials</h3>
+                                </div>
+                            </div>
+
+                            {/* Bottom Card: Elemental Shield */}
+                            <div 
+                                onClick={() => {
+                                    setSelectedTab('ACCESSORIES');
+                                    scrollToCatalog();
+                                }}
+                                className="flex-1 relative rounded-3xl overflow-hidden group cursor-pointer shadow-[0_8px_30px_rgb(0,0,0,0.01)]"
+                            >
+                                <img 
+                                    src="/elemental_shield.png" 
+                                    alt="Elemental Shield Rain Techwear" 
+                                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+                                <div className="absolute bottom-6 left-6 text-white">
+                                    <h3 className="text-sm font-bold tracking-widest uppercase">Elemental Shield</h3>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Catalog Grid Section */}
-            <section id="catalog-section" className="bg-[#fcfcfb] border-b border-neutral-200/25 py-20 w-full flex-grow">
-                <main className="max-w-7xl mx-auto px-6 lg:px-8">
+            <section id="catalog-section" className="bg-[#fcfcfb] border-b border-neutral-200/25 py-24 w-full flex-grow">
+                <main className="max-w-7xl mx-auto px-6 lg:px-8 space-y-8">
                     {/* Catalog Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-neutral-100 pb-6 mb-10">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-neutral-100 pb-6">
                         <div>
-                            <span className="text-[10px] font-bold tracking-[0.25em] text-neutral-400 uppercase">Storefront Catalog</span>
+                            <span className="text-[9.5px] font-extrabold tracking-[0.25em] text-neutral-400 uppercase">Curated Catalog</span>
                             <h2 className="text-xl font-bold tracking-wider uppercase text-neutral-950 mt-1 flex items-center gap-2">
-                                {categories.find(c => c.id === selectedTab)?.name || 'ALL'} Collection
-                                {selectedTab === 'TRENDING' && <TrendingUp className="w-5 h-5 text-amber-500" />}
+                                {selectedTab === 'ALL' ? 'All Items' : selectedTab} Collection
                             </h2>
                         </div>
-                        <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-widest">
-                            Showing {displayProducts.length} Items
-                        </span>
+                        
+                        {/* Dynamic Category Filtering Tabs */}
+                        <div className="flex flex-wrap gap-2">
+                            {['ALL', 'OUTWEAR', 'FOOTWEAR', 'ACCESSORIES'].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setSelectedTab(tab)}
+                                    className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full transition-all cursor-pointer
+                                        ${selectedTab === tab 
+                                            ? 'bg-black text-white' 
+                                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}`}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Local In-Catalog Search Bar (fully functional) */}
+                    <div className="max-w-md relative">
+                        <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                        <input
+                            id="catalog-search-input"
+                            type="text"
+                            placeholder="Search catalog products..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-white border border-neutral-200 hover:border-neutral-350 focus:border-black transition-all rounded-full py-3 pl-12 pr-6 text-xs font-semibold uppercase tracking-wider outline-none placeholder:text-neutral-400 placeholder:normal-case placeholder:tracking-normal"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-4.5 top-1/2 -translate-y-1/2 text-neutral-450 hover:text-black p-0.5 rounded-full hover:bg-neutral-100 cursor-pointer border-none bg-transparent"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        )}
                     </div>
 
                     {/* Error Banner */}
                     {error && (
-                        <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 shadow-sm">
+                        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 shadow-sm">
                             <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                             <div>
                                 <h4 className="text-sm font-bold text-red-800">Connection Error</h4>
-                                <p className="text-xs text-red-600 font-medium mt-0.5">{error}</p>
+                                <p className="text-xs text-red-600 font-semibold mt-0.5">{error}</p>
                             </div>
                         </div>
                     )}
 
                     {/* Products Grid / Skeletons */}
                     {isLoading ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                            {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="bg-white rounded-2xl border border-neutral-100/30 overflow-hidden shadow-sm p-3 space-y-3 animate-pulse">
-                                    <div className="aspect-[3/4] bg-neutral-100 rounded-xl w-full" />
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="space-y-4 animate-pulse">
+                                    <div className="aspect-[3/4] bg-neutral-100 rounded-2xl w-full" />
                                     <div className="space-y-2">
-                                        <div className="h-3 bg-neutral-100 rounded-md w-3/4" />
-                                        <div className="h-2.5 bg-neutral-100 rounded-md w-full" />
-                                    </div>
-                                    <div className="pt-2 border-t border-neutral-50 flex justify-between">
                                         <div className="h-3 bg-neutral-100 rounded-md w-1/4" />
+                                        <div className="h-3.5 bg-neutral-100 rounded-md w-3/4" />
                                         <div className="h-3 bg-neutral-100 rounded-md w-1/3" />
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    ) : displayProducts.length === 0 ? (
-                        <div className="w-full flex flex-col items-center justify-center py-24 text-center border border-neutral-100 bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.01)]">
+                    ) : filteredProducts.length === 0 ? (
+                        <div className="w-full flex flex-col items-center justify-center py-24 text-center border border-neutral-100 bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.005)]">
                             <div className="p-4 bg-neutral-50 rounded-full text-neutral-400 mb-4">
                                 <Shirt className="w-7 h-7 stroke-[1.25] text-neutral-800" />
                             </div>
                             <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-950">Collection Empty</h3>
-                            <p className="text-xs text-neutral-400 font-medium mt-1.5 max-w-xs leading-relaxed">
-                                No items currently available in the selected capsule collection.
+                            <p className="text-xs text-neutral-450 font-semibold mt-1.5 max-w-xs leading-relaxed">
+                                No items found matching the selected capsule filter or search criteria.
                             </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
-                            {displayProducts.map((product) => (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-x-6 gap-y-10">
+                            {filteredProducts.map((product) => (
                                 <BuyerProductCard key={product._id || product.id} product={product} />
                             ))}
                         </div>
@@ -286,83 +410,158 @@ const Home = () => {
                 </main>
             </section>
 
-            {/* Premium Lookbook Poster Section */}
-            <section id="lookbook" className="py-16 bg-white border-b border-neutral-100/50">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                    <div className="relative rounded-3xl overflow-hidden h-[50vh] bg-neutral-900 shadow-2xl flex items-center p-8 sm:p-16">
-                        {/* Background Poster Image */}
-                        <div className="absolute inset-0 z-0">
-                            <img 
-                                src="/fashion_editorial_poster.png" 
-                                alt="Editorial Couture" 
-                                className="w-full h-full object-cover opacity-75 object-[center_30%] transition-transform duration-1000 hover:scale-[1.03]"
+            {/* Dark Philosophy Poster Section */}
+            <section className="bg-neutral-950 text-white py-24 flex flex-col items-center text-center">
+                <div className="max-w-2xl px-6 space-y-6">
+                    <h2 className="text-xl sm:text-2xl font-extrabold tracking-[0.3em] uppercase leading-snug">
+                        Engineered for the Urban Void
+                    </h2>
+                    
+                    <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed font-semibold">
+                        FlexDrip isn't just apparel; it's a structural response to the modern environment. High-performance fabrics meet minimalist silhouettes for those who navigate the architecture of the city.
+                    </p>
+                    
+                    <div className="pt-4">
+                        <button 
+                            onClick={() => setPhilosophyOpen(true)}
+                            className="bg-white text-black px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-neutral-100 hover:-translate-y-0.5 active:scale-[0.98] transition-all cursor-pointer shadow-md border-none"
+                        >
+                            Our Philosophy
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* Join the Inner Circle Section */}
+            <section className="py-24 bg-white border-b border-neutral-100/50">
+                <div className="max-w-md mx-auto px-6 text-center space-y-8">
+                    <div className="space-y-2">
+                        <h2 className="text-lg sm:text-xl font-bold tracking-widest uppercase text-neutral-950">
+                            Join the Inner Circle
+                        </h2>
+                        <p className="text-xs text-neutral-450 font-semibold leading-relaxed">
+                            Receive exclusive access to seasonal drops and architectural insights.
+                        </p>
+                    </div>
+
+                    {/* Email Newsletter form (fully functional locally) */}
+                    <form onSubmit={handleSubscribe} className="space-y-4">
+                        <div className="relative border-b border-neutral-350 pb-2 flex items-center">
+                            <input
+                                type="email"
+                                placeholder="YOUR EMAIL ADDRESS"
+                                value={email}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    if (subscriptionStatus) setSubscriptionStatus('');
+                                }}
+                                className="w-full bg-transparent text-xs font-bold uppercase tracking-wider py-1 outline-none border-none placeholder:text-neutral-400"
+                                required
                             />
-                            <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/40 to-transparent" />
+                            <button
+                                type="submit"
+                                className="text-[10px] font-extrabold text-neutral-950 uppercase tracking-widest hover:opacity-75 transition-opacity bg-transparent border-none cursor-pointer pl-4 py-1"
+                            >
+                                Subscribe
+                            </button>
                         </div>
                         
-                        {/* Content Overlay */}
-                        <div className="relative z-10 max-w-md text-white">
-                            <div className="backdrop-blur-md bg-black/35 border border-white/10 p-8 sm:p-10 rounded-3xl space-y-4 shadow-xl">
-                                <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-amber-200 block">Editorial Capsule</span>
-                                <h3 className="text-xl sm:text-3xl font-extrabold tracking-widest uppercase leading-snug">
-                                    THE EDITORIAL COUTURE
-                                </h3>
-                                <p className="text-[11px] text-neutral-350 leading-relaxed font-semibold">
-                                    A structured conversation between clean tailored contours and absolute ease. Broad shoulders, heavy-weight cotton blends, and drop silhouettes defined for comfort.
-                                </p>
-                                <div className="pt-2">
+                        {subscriptionStatus === 'success' && (
+                            <div className="flex items-center justify-center gap-2 p-3 bg-neutral-900 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest animate-in slide-in-from-bottom-2">
+                                <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+                                Welcome, {subscriberName}! Access Code sent.
+                            </div>
+                        )}
+                        {subscriptionStatus === 'error' && (
+                            <div className="p-3 bg-red-50 text-red-650 rounded-xl text-[10px] font-bold uppercase tracking-widest animate-in slide-in-from-bottom-2">
+                                Please enter a valid email address.
+                            </div>
+                        )}
+                    </form>
+                </div>
+            </section>
+
+            {/* Premium Editorial Multi-column Footer */}
+            <footer className="bg-neutral-950 text-white py-20 border-t border-neutral-900">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-16">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                        {/* Column 1: Brand Info */}
+                        <div className="space-y-4 text-left">
+                            <h3 className="text-base font-extrabold tracking-[0.3em] uppercase">FLEXDRIP</h3>
+                            <p className="text-xs text-neutral-450 font-semibold leading-relaxed max-w-xs">
+                                High-performance digital boutique specializing in architectural streetwear and technical essentials.
+                            </p>
+                        </div>
+
+                        {/* Column 2: Collections */}
+                        <div className="space-y-4 text-left">
+                            <h4 className="text-xs font-extrabold tracking-widest uppercase text-neutral-200">Collections</h4>
+                            <ul className="space-y-2.5 text-xs text-neutral-450 font-semibold uppercase tracking-wider list-none p-0 m-0">
+                                <li>
                                     <button 
-                                        onClick={scrollToCatalog}
-                                        className="group flex items-center gap-1.5 bg-white text-black px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-neutral-100 hover:-translate-y-0.5 active:scale-[0.98] transition-all cursor-pointer shadow-md"
+                                        onClick={() => { setSelectedTab('ALL'); scrollToCatalog(); }}
+                                        className="hover:text-white transition-colors bg-transparent border-none cursor-pointer p-0 text-left font-semibold"
                                     >
-                                        View Drop
-                                        <ArrowRight className="w-3.5 h-3.5 stroke-[2.5] group-hover:translate-x-0.5 transition-transform duration-200" />
+                                        New Arrivals
                                     </button>
-                                </div>
-                            </div>
+                                </li>
+                                <li>
+                                    <button 
+                                        onClick={() => { setSelectedTab('OUTWEAR'); scrollToCatalog(); }}
+                                        className="hover:text-white transition-colors bg-transparent border-none cursor-pointer p-0 text-left font-semibold"
+                                    >
+                                        Outwear
+                                    </button>
+                                </li>
+                                <li>
+                                    <button 
+                                        onClick={() => { setSelectedTab('FOOTWEAR'); scrollToCatalog(); }}
+                                        className="hover:text-white transition-colors bg-transparent border-none cursor-pointer p-0 text-left font-semibold"
+                                    >
+                                        Footwear
+                                    </button>
+                                </li>
+                                <li>
+                                    <button 
+                                        onClick={() => { setSelectedTab('ACCESSORIES'); scrollToCatalog(); }}
+                                        className="hover:text-white transition-colors bg-transparent border-none cursor-pointer p-0 text-left font-semibold"
+                                    >
+                                        Accessories
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Column 3: Support */}
+                        <div className="space-y-4 text-left">
+                            <h4 className="text-xs font-extrabold tracking-widest uppercase text-neutral-200">Support</h4>
+                            <ul className="space-y-2.5 text-xs text-neutral-450 font-semibold uppercase tracking-wider list-none p-0 m-0">
+                                <li><a href="#" className="hover:text-white transition-colors no-underline">Shipping</a></li>
+                                <li><a href="#" className="hover:text-white transition-colors no-underline">Returns</a></li>
+                                <li><a href="#" className="hover:text-white transition-colors no-underline">Size Guide</a></li>
+                                <li><a href="#" className="hover:text-white transition-colors no-underline">Contact</a></li>
+                            </ul>
+                        </div>
+
+                        {/* Column 4: Social */}
+                        <div className="space-y-4 text-left">
+                            <h4 className="text-xs font-extrabold tracking-widest uppercase text-neutral-200">Social</h4>
+                            <ul className="space-y-2.5 text-xs text-neutral-450 font-semibold uppercase tracking-wider list-none p-0 m-0">
+                                <li><a href="#" className="hover:text-white transition-colors no-underline">Instagram</a></li>
+                                <li><a href="#" className="hover:text-white transition-colors no-underline">TikTok</a></li>
+                                <li><a href="#" className="hover:text-white transition-colors no-underline">X / Twitter</a></li>
+                            </ul>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            {/* Brand Assurances Bar */}
-            <section className="bg-white border-b border-neutral-100 py-10">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-4 divide-y sm:divide-y-0 sm:divide-x divide-neutral-100/70 text-center">
-                        <div className="flex flex-col items-center justify-center gap-2 py-2 sm:py-0">
-                            <div className="p-3 bg-neutral-50 rounded-full text-black mb-1.5">
-                                <Truck className="w-4.5 h-4.5 stroke-[1.5]" />
-                            </div>
-                            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-900">Complimentary Shipping</span>
-                            <span className="text-[9px] text-neutral-400 font-semibold uppercase mt-0.5 tracking-wider">Free delivery above ₹1,999</span>
+                    {/* Divider and Copyright */}
+                    <div className="pt-8 border-t border-neutral-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+                        <div className="flex gap-6">
+                            <a href="#" className="hover:text-white transition-colors no-underline">Privacy Policy</a>
+                            <a href="#" className="hover:text-white transition-colors no-underline">Terms of Service</a>
                         </div>
-                        <div className="flex flex-col items-center justify-center gap-2 py-2 sm:py-0">
-                            <div className="p-3 bg-neutral-50 rounded-full text-black mb-1.5">
-                                <RotateCcw className="w-4.5 h-4.5 stroke-[1.5]" />
-                            </div>
-                            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-900">Exchange Guarantee</span>
-                            <span className="text-[9px] text-neutral-400 font-semibold uppercase mt-0.5 tracking-wider">Hassle-free 7-day swap policy</span>
-                        </div>
-                        <div className="flex flex-col items-center justify-center gap-2 py-2 sm:py-0">
-                            <div className="p-3 bg-neutral-50 rounded-full text-black mb-1.5">
-                                <ShieldCheck className="w-4.5 h-4.5 stroke-[1.5]" />
-                            </div>
-                            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-900">Secured Payments</span>
-                            <span className="text-[9px] text-neutral-400 font-semibold uppercase mt-0.5 tracking-wider">Fully encrypted SSL transactions</span>
-                        </div>
+                        <p>© 2026 FLEXDRIP. ALL RIGHTS RESERVED.</p>
                     </div>
-                </div>
-            </section>
-
-            {/* Minimal Brand Footer */}
-            <footer className="bg-neutral-950 text-white py-16">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center space-y-6">
-                    <h3 className="text-xl font-extrabold tracking-[0.3em] text-white uppercase">FLEXDRIP</h3>
-                    <p className="text-[10px] text-neutral-450 font-bold uppercase tracking-widest max-w-xs mx-auto">
-                        Elevated essentials and oversized drops engineered for the modern wardrobe.
-                    </p>
-                    <div className="w-8 h-[1px] bg-neutral-800 mx-auto" />
-                    <p className="text-[9px] text-neutral-500 font-semibold tracking-wider">© 2026 FLEXDRIP CLOTHING CO. ALL RIGHTS RESERVED.</p>
                 </div>
             </footer>
         </div>

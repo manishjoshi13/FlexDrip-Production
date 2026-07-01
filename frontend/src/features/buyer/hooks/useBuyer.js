@@ -5,6 +5,7 @@ export const useBuyer=()=>{
     const dispatch=useDispatch()
     const { allProducts, trendingProducts, singleProduct, similarProducts, error, isLoading, cart } = useSelector((state)=>state.buyer)
     const viewProduct=async(id)=>{
+        dispatch(setSingleProduct(null));
         dispatch(setLoading(true))
         try {
             const response=await getSingleProductAPI(id)

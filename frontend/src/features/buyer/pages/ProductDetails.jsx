@@ -410,7 +410,7 @@ const ProductDetails = () => {
                         </div>
 
                         {/* Dynamic Variant Options Selectors */}
-                        {singleProduct.hasVariants && resolvedOptions && resolvedOptions.length > 0 ? (
+                        {singleProduct.hasVariants && resolvedOptions && resolvedOptions.length > 0 && (
                             <div className="space-y-6">
                                 {resolvedOptions.map((opt) => (
                                     <div key={opt.name} className="space-y-3">
@@ -457,32 +457,6 @@ const ProductDetails = () => {
                                     </div>
                                 ))}
                             </div>
-                        ) : (
-                            /* Simple Product Size Fallback (e.g. for Shirts category if variants are not set up) */
-                            !singleProduct.hasVariants && singleProduct.category === 'SHIRTS' && (
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-gray-400">
-                                        <span>Select Size</span>
-                                        <a href="#" className="underline text-gray-500 hover:text-black transition-colors">Size Guide</a>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2.5">
-                                        {['S', 'M', 'L', 'XL', 'XXL'].map((size) => (
-                                            <button
-                                                key={size}
-                                                type="button"
-                                                onClick={() => setSelectedSize(size)}
-                                                className={`w-11 h-11 rounded-xl text-xs font-bold border transition-all duration-200 active:scale-95 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm
-                                                    ${selectedSize === size 
-                                                        ? 'bg-black border-black text-white shadow-md' 
-                                                        : 'bg-white border-neutral-200 text-neutral-800 hover:border-black hover:bg-neutral-50'
-                                                    }`}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
                         )}
 
                         {/* Quantity Selection */}

@@ -12,10 +12,12 @@ import { getBuyerTicketRaisedHTML } from "../html/buyerTicketRaised.js";
 import { config } from "../config/config.js";
 
 
-// Initialize Gemini 2.5 Flash Lite Model
+// Initialize Gemini 1.5 Flash Model (Optimized for low-latency tool-calling)
 const geminiModel = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash-lite",
-  apiKey: config.GEMINI_API_KEY
+  model: "gemini-2.5-flash",
+  apiKey: config.GEMINI_API_KEY,
+  temperature: 0.15,
+  maxOutputTokens: 800
 });
 
 /**
@@ -214,7 +216,7 @@ export const runChatbotAgent = async (userMessage, chatHistory, user) => {
         }
     }, {
         name: "query_knowledge_base",
-        description: "Query the vector store knowledge base for general information about FlexDrip storefront, business, policies, shipping/returns, or clothing categories.",
+        description: "Dont use if query is related to basic infromation about the buisness such as checking order status or raising a ticket,Query the vector store knowledge base for general information about FlexDrip storefront, business, policies, shipping/returns, or clothing categories.",
         schema: z.object({
             query: z.string().describe("General query search text about business policies, hours, or products.")
         })
@@ -241,7 +243,9 @@ export const runChatbotAgent = async (userMessage, chatHistory, user) => {
         "   - If a ticket is already raised, inform them: 'A support ticket has already been raised for this order. Our merchant partner is reviewing it and the issue will be resolved shortly.'\n" +
         "   - If no ticket is raised, call the 'raise_ticket' tool using details provided by the user (or ask for a description if they haven't provided one).\n" +
         "7. For general inquiries about store policies (shipping fees, returns, operations), call 'query_knowledge_base' to search our vector store. Do not guess or hallucinate if the details are specific.\n" +
-        "8. If the user is unauthenticated (guest), you won't have access to their active orders or tickets. If they ask about orders/tickets, tell them to log in to their FlexDrip account first."
+        "8. If the user is unauthenticated (guest), you won't have access to their active orders or tickets. If they ask about orders/tickets, tell them to log in to their FlexDrip account first or Verify if they have an account and try again.\n\n" +
+        "Latency & Response Length Guidelines:\n" +
+        "9. Keep responses extremely concise, direct, and to-the-point (typically 1-3 sentences). Do not use unnecessary greetings, introductory preambles, or wordy explanations. This minimizes token generation count and network latency."
     );
 
     const messages = [systemPrompt];

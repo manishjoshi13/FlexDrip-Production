@@ -53,7 +53,7 @@ const createProduct = asyncHandler(async (req, res, next) => {
         description,
         price: { amount: Number(priceAmount), currency: priceCurrency || 'INR' },
         images,
-        category: category || 'ESSENTIALS',
+        category: category || 'OUTWEAR',
         stock: stock ? Number(stock) : 0,
         hasVariants: hasVariants === 'true' || hasVariants === true,
         variants: parsedVariants,

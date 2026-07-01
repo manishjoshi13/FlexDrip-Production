@@ -1,5 +1,6 @@
-export const getVerifyAccountHTML = (fullName, token, frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173') => {
-    const verificationUrl = `${frontendUrl}/verify-email?token=${token}`;
+export const getVerifyAccountHTML = (fullName, token, backendUrl) => {
+    const resolvedUrl = backendUrl || process.env.BACKEND_URL || 'http://localhost:3000';
+    const verificationUrl = `${resolvedUrl}/api/auth/verify-registration?token=${token}`;
     
     return `<!DOCTYPE html>
 <html>
