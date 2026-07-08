@@ -13,7 +13,7 @@ export const useBuyer=()=>{
                 dispatch(setSingleProduct(response.product))
             }
         } catch (error) {
-            dispatch(setError(error.message))
+            dispatch(setError(error.response?.data?.message || error.message))
         } finally {
             dispatch(setLoading(false))
         }
@@ -26,7 +26,7 @@ export const useBuyer=()=>{
                 dispatch(setAllProducts(response.products));
             }
         } catch (error) {
-            dispatch(setError(error.message));
+            dispatch(setError(error.response?.data?.message || error.message));
         } finally {
             dispatch(setLoading(false));
         }
@@ -40,7 +40,7 @@ export const useBuyer=()=>{
                 dispatch(setTrendingProducts(response.products));
             }
         } catch (error) {
-            dispatch(setError(error.message));
+            dispatch(setError(error.response?.data?.message || error.message));
         } finally {
             dispatch(setLoading(false));
         }
@@ -56,7 +56,7 @@ export const useBuyer=()=>{
                 dispatch(setSimilarProducts(response.products))
             }
         } catch (error) {
-            dispatch(setError(error.message))
+            dispatch(setError(error.response?.data?.message || error.message))
         } finally {
             dispatch(setLoading(false))
         }

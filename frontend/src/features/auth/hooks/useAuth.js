@@ -141,6 +141,10 @@ export const useAuth = () => {
         }
     };
 
+    const resetError = () => {
+        dispatch(setError(null));
+    };
+
     return {
         user,
         isLoading,
@@ -151,8 +155,7 @@ export const useAuth = () => {
         getMe,
         updateProfile,
         forgotPassword,
-        resetPassword
+        resetPassword,
+        resetError
     }
-
-
 }

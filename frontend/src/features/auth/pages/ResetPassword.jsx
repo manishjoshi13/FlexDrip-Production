@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lock, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { NavLink, useSearchParams } from 'react-router-dom';
@@ -6,9 +6,15 @@ import AuthLayout from '../components/AuthLayout';
 import AuthInput from '../components/AuthInput';
 
 const ResetPassword = () => {
-    const { resetPassword, isLoading, error } = useAuth();
+    const { resetPassword, isLoading, error, resetError } = useAuth();
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
+
+    useEffect(() => {
+        return () => {
+            resetError();
+        };
+    }, []);
 
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');

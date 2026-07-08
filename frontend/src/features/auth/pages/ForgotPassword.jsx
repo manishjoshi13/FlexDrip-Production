@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, ArrowRight, Loader2, KeyRound } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { NavLink } from 'react-router-dom';
@@ -6,9 +6,15 @@ import AuthLayout from '../components/AuthLayout';
 import AuthInput from '../components/AuthInput';
 
 const ForgotPassword = () => {
-    const { forgotPassword, isLoading, error } = useAuth();
+    const { forgotPassword, isLoading, error, resetError } = useAuth();
     const [email, setEmail] = useState('');
     const [isEmailSent, setIsEmailSent] = useState(false);
+
+    useEffect(() => {
+        return () => {
+            resetError();
+        };
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

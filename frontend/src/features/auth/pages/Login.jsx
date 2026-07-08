@@ -10,7 +10,7 @@ import RoleSelector from '../components/RoleSelector';
 
 const Login = () => {
     const [role, setRole] = useState('buyer');
-    const { user, login, isLoading, error } = useAuth();
+    const { user, login, isLoading, error, resetError } = useAuth();
     const [formData, setFormData] = useState({ email: '', password: '' });
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -29,6 +29,12 @@ const Login = () => {
             navigate('/');
         }
     }, [user, navigate]);
+
+    useEffect(() => {
+        return () => {
+            resetError();
+        };
+    }, []);
 
     const loginHandle = async (e) => {
         e.preventDefault();

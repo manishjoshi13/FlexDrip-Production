@@ -8,7 +8,7 @@ import RoleSelector from '../components/RoleSelector';
 
 const Register = () => {
     const [role, setRole] = useState('buyer');
-    const { user, register, isLoading, error } = useAuth();
+    const { user, register, isLoading, error, resetError } = useAuth();
     const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', password: '' });
     const [isEmailSent, setIsEmailSent] = useState(false);
     const [registeredEmail, setRegisteredEmail] = useState('');
@@ -19,6 +19,12 @@ const Register = () => {
             navigate('/');
         }
     }, [user, navigate]);
+
+    useEffect(() => {
+        return () => {
+            resetError();
+        };
+    }, []);
 
     const registerHandle = async (e) => {
         e.preventDefault();
